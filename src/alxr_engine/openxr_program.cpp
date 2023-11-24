@@ -230,6 +230,21 @@ inline XrReferenceSpaceCreateInfo GetXrReferenceSpaceCreateInfo(const std::strin
         referenceSpaceCreateInfo.poseInReferenceSpace = Math::Pose::Translation({ 0.f, -1.4f,0.f });
         referenceSpaceCreateInfo.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;
     } else if (EqualsIgnoreCase(referenceSpaceTypeStr, "Stage")) {
+        char buffer[10] = {0,};
+        int fd = open("/sdcard/height_config.txt", O_RDONLY);
+        if (fd > 0)
+        {
+            int read_size = read(fd, buffer, sizeof(buffer) - 1);
+            Log::Write(Log::Level::Info, Fmt("height_config File size : %d File FD : %d", read_size, fd));
+            buffer[read_size] = 0;
+            if(read_size > 0)
+            {
+                float height = -1.0 * atof(buffer);
+                Log::Write(Log::Level::Info, Fmt("height_config --%f--", height));
+                referenceSpaceCreateInfo.poseInReferenceSpace = Math::Pose::Translation({ 0.f, height, 0.f });
+            }
+            close(fd);
+        }
         referenceSpaceCreateInfo.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_STAGE;
     } else if (EqualsIgnoreCase(referenceSpaceTypeStr, "StageLeft")) {
         referenceSpaceCreateInfo.poseInReferenceSpace = Math::Pose::RotateCCWAboutYAxis(0.f, {-2.f, 0.f, -2.f});
